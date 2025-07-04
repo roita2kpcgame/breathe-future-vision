@@ -1,11 +1,23 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState, useEffect } from 'react';
+import { Hero } from '@/components/Hero';
+import { PollutionMap } from '@/components/PollutionMap';
+import { DataDashboard } from '@/components/DataDashboard';
+import { AIForecasting } from '@/components/AIForecasting';
+import { FeatureGrid } from '@/components/FeatureGrid';
+import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#B0BEC5] to-[#263238] relative overflow-hidden">
+      <ParticleBackground />
+      
+      <div className="relative z-10">
+        <Hero />
+        <PollutionMap />
+        <DataDashboard />
+        <AIForecasting />
+        <FeatureGrid />
       </div>
     </div>
   );
