@@ -122,7 +122,7 @@ export const FeatureGrid = () => {
         <div className="mt-16 text-center">
           <div className="bg-gradient-to-r from-[#00C853]/10 to-[#FF6F00]/10 rounded-2xl p-8 border border-white/20">
             <h3 className="text-2xl font-bold text-[#263238] mb-4">
-              ISRO Hackathon 2024 - Air Pollution Monitoring
+              Air Pollution Monitoring Platform
             </h3>
             <p className="text-[#263238]/70 mb-6 max-w-4xl mx-auto">
               This platform demonstrates the integration of satellite remote sensing, artificial intelligence, 
