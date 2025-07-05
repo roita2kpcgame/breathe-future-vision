@@ -19,7 +19,7 @@ const Index = () => {
         <Hero />
         
         {/* 3D Earth Section */}
-        <section className="py-20 px-4">
+        <section className="py-12 sm:py-20 px-4">
           <div className="max-w-4xl mx-auto">
             <Earth3D />
           </div>

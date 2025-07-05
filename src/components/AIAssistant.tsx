@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Send, Bot, Zap, Brain, Search, X, Satellite, Wind, MapPin, TrendingUp, AlertTriangle, Heart } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Message {
   type: 'user' | 'ai';
@@ -13,11 +13,12 @@ interface Message {
 }
 
 export const AIAssistant = () => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'ai',
-      content: 'नमस्ते! I\'m AakaashSetu AI Assistant 🇮🇳. I provide real-time air quality insights, health recommendations, and environmental predictions using ISRO satellite data and advanced AI. How can I help you breathe better today?',
+      content: t('aiAssistantGreeting'),
       timestamp: new Date().toLocaleTimeString()
     }
   ]);
@@ -68,6 +69,45 @@ export const AIAssistant = () => {
     }
   };
 
+  const quickActions = [
+    { 
+      label: t('currentAQI'), 
+      icon: Zap, 
+      action: () => setInputValue('What is the current air quality in my area?'),
+      color: 'bg-[#00C853]'
+    },
+    { 
+      label: t('healthTips'), 
+      icon: Heart, 
+      action: () => setInputValue('Give me health recommendations for current pollution levels'),
+      color: 'bg-red-500'
+    },
+    { 
+      label: t('tomorrowForecast'), 
+      icon: TrendingUp, 
+      action: () => setInputValue('What is tomorrow\'s air quality prediction?'),
+      color: 'bg-blue-500'
+    },
+    { 
+      label: t('emergencyHelp'), 
+      icon: AlertTriangle, 
+      action: () => setInputValue('Air pollution emergency protocol'),
+      color: 'bg-orange-500'
+    },
+    { 
+      label: t('satelliteData'), 
+      icon: Satellite, 
+      action: () => setInputValue('Show me satellite data insights'),
+      color: 'bg-purple-500'
+    },
+    { 
+      label: t('locationAnalysis'), 
+      icon: MapPin, 
+      action: () => setInputValue('Analyze air quality for my location'),
+      color: 'bg-teal-500'
+    }
+  ];
+
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
 
@@ -115,58 +155,19 @@ export const AIAssistant = () => {
     }, 1800);
   };
 
-  const quickActions = [
-    { 
-      label: 'Current AQI', 
-      icon: Zap, 
-      action: () => setInputValue('What is the current air quality in my area?'),
-      color: 'bg-[#00C853]'
-    },
-    { 
-      label: 'Health Tips', 
-      icon: Heart, 
-      action: () => setInputValue('Give me health recommendations for current pollution levels'),
-      color: 'bg-red-500'
-    },
-    { 
-      label: 'Tomorrow Forecast', 
-      icon: TrendingUp, 
-      action: () => setInputValue('What is tomorrow\'s air quality prediction?'),
-      color: 'bg-blue-500'
-    },
-    { 
-      label: 'Emergency Help', 
-      icon: AlertTriangle, 
-      action: () => setInputValue('Air pollution emergency protocol'),
-      color: 'bg-orange-500'
-    },
-    { 
-      label: 'Satellite Data', 
-      icon: Satellite, 
-      action: () => setInputValue('Show me satellite data insights'),
-      color: 'bg-purple-500'
-    },
-    { 
-      label: 'Location Analysis', 
-      icon: MapPin, 
-      action: () => setInputValue('Analyze air quality for my location'),
-      color: 'bg-teal-500'
-    }
-  ];
-
   return (
     <>
       {/* Enhanced Floating AI Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <div className="relative">
           <Button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-[#00C853] via-[#FF6F00] to-[#263238] hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-pulse border-4 border-white"
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-[#00C853] via-[#FF6F00] to-[#263238] hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-pulse border-4 border-white"
           >
-            {isOpen ? <X className="w-7 h-7 text-white" /> : <Bot className="w-7 h-7 text-white" />}
+            {isOpen ? <X className="w-5 h-5 sm:w-7 sm:h-7 text-white" /> : <Bot className="w-5 h-5 sm:w-7 sm:h-7 text-white" />}
           </Button>
           {!isOpen && (
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
+            <div className="absolute -top-2 -right-2 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
               <span className="text-white text-xs font-bold">AI</span>
             </div>
           )}
@@ -175,28 +176,28 @@ export const AIAssistant = () => {
 
       {/* Enhanced AI Chat Interface */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-[420px] h-[580px] bg-gradient-to-br from-white/98 via-blue-50/95 to-green-50/95 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-white/50 z-40 animate-scale-in">
+        <div className="fixed bottom-16 right-4 sm:bottom-24 sm:right-6 w-[95vw] max-w-[420px] h-[85vh] max-h-[580px] bg-gradient-to-br from-white/98 via-blue-50/95 to-green-50/95 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-white/50 z-40 animate-scale-in">
           {/* Enhanced Header */}
-          <div className="p-5 border-b border-gradient-to-r from-[#00C853]/20 to-[#FF6F00]/20 bg-gradient-to-r from-[#00C853]/5 via-white/50 to-[#FF6F00]/5 rounded-t-3xl">
+          <div className="p-4 sm:p-5 border-b border-gradient-to-r from-[#00C853]/20 to-[#FF6F00]/20 bg-gradient-to-r from-[#00C853]/5 via-white/50 to-[#FF6F00]/5 rounded-t-3xl">
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-r from-[#00C853] via-[#FF6F00] to-[#263238] rounded-full flex items-center justify-center animate-pulse border-2 border-white">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#00C853] via-[#FF6F00] to-[#263238] rounded-full flex items-center justify-center animate-pulse border-2 border-white">
+                  <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-ping"></div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-white animate-ping"></div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-[#263238] text-lg">AakaashSetu AI</h3>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-[#263238] text-base sm:text-lg truncate">{t('appName')} AI</h3>
                 <p className="text-xs text-[#263238]/70 flex items-center space-x-1">
-                  <Satellite className="w-3 h-3" />
-                  <span>ISRO • Real-time Air Quality Intelligence</span>
+                  <Satellite className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">ISRO • Real-time Intelligence</span>
                 </p>
               </div>
               <div className="flex flex-col items-end space-y-1">
                 <Badge className="bg-green-500 text-white text-xs">
                   🇮🇳 Online
                 </Badge>
-                <Badge className="bg-blue-500 text-white text-xs">
+                <Badge className="bg-blue-500 text-white text-xs hidden sm:block">
                   99.2% Accurate
                 </Badge>
               </div>
@@ -204,18 +205,18 @@ export const AIAssistant = () => {
           </div>
 
           {/* Enhanced Messages */}
-          <div className="flex-1 p-4 h-[340px] overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-[#00C853]/30">
+          <div className="flex-1 p-3 sm:p-4 h-[45vh] sm:h-[340px] overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-[#00C853]/30">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-4 rounded-2xl shadow-lg ${
+                <div className={`max-w-[85%] p-3 sm:p-4 rounded-2xl shadow-lg ${
                   message.type === 'user' 
                     ? 'bg-gradient-to-r from-[#00C853] to-[#00C853]/90 text-white' 
                     : 'bg-gradient-to-r from-white to-blue-50/80 text-[#263238] border border-white/50'
                 }`}>
                   {message.type === 'ai' && message.icon && (
-                    <div className="text-lg mb-2">{message.icon}</div>
+                    <div className="text-base sm:text-lg mb-2">{message.icon}</div>
                   )}
-                  <p className="text-sm leading-relaxed whitespace-pre-line">{message.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-line break-words">{message.content}</p>
                   <p className={`text-xs mt-2 ${message.type === 'user' ? 'text-white/70' : 'text-[#263238]/70'}`}>
                     {message.timestamp}
                   </p>
@@ -225,7 +226,7 @@ export const AIAssistant = () => {
             
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-gradient-to-r from-white to-blue-50/80 p-4 rounded-2xl border border-white/50 shadow-lg">
+                <div className="bg-gradient-to-r from-white to-blue-50/80 p-3 sm:p-4 rounded-2xl border border-white/50 shadow-lg">
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-[#00C853] rounded-full animate-bounce"></div>
@@ -249,29 +250,29 @@ export const AIAssistant = () => {
                   variant="outline"
                   size="sm"
                   onClick={action.action}
-                  className={`text-xs hover:scale-105 transition-all duration-200 ${action.color} text-white border-none hover:opacity-90`}
+                  className={`text-xs hover:scale-105 transition-all duration-200 ${action.color} text-white border-none hover:opacity-90 p-2`}
                 >
-                  <action.icon className="w-3 h-3 mr-1" />
-                  {action.label}
+                  <action.icon className="w-3 h-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">{action.label}</span>
                 </Button>
               ))}
             </div>
           </div>
 
           {/* Enhanced Input */}
-          <div className="p-4 border-t border-white/30 bg-gradient-to-r from-white/60 to-green-50/40 rounded-b-3xl">
-            <div className="flex space-x-3">
+          <div className="p-3 sm:p-4 border-t border-white/30 bg-gradient-to-r from-white/60 to-green-50/40 rounded-b-3xl">
+            <div className="flex space-x-2 sm:space-x-3">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask about air quality, health tips, predictions..."
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1 bg-white/80 backdrop-blur-sm border-[#00C853]/30 focus:border-[#00C853] rounded-xl"
+                className="flex-1 bg-white/80 backdrop-blur-sm border-[#00C853]/30 focus:border-[#00C853] rounded-xl text-sm"
               />
               <Button 
                 onClick={handleSendMessage} 
                 size="icon" 
-                className="bg-gradient-to-r from-[#00C853] to-[#00C853]/90 hover:scale-105 transition-all duration-200 rounded-xl"
+                className="bg-gradient-to-r from-[#00C853] to-[#00C853]/90 hover:scale-105 transition-all duration-200 rounded-xl flex-shrink-0"
               >
                 <Send className="w-4 h-4" />
               </Button>
