@@ -11,7 +11,7 @@ interface City {
   color: string;
   state: string;
   coordinates: [number, number];
-  position: { x: number; y: number };
+  position?: { x: number; y: number };
 }
 
 interface IndiaMapProps {
