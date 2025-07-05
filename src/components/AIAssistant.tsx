@@ -5,9 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Send, Bot, Zap, Brain, Search, X, Satellite, Wind, MapPin, TrendingUp, AlertTriangle, Heart } from 'lucide-react';
 
+interface Message {
+  type: 'user' | 'ai';
+  content: string;
+  timestamp: string;
+  icon?: string;
+}
+
 export const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       type: 'ai',
       content: 'नमस्ते! I\'m AakaashSetu AI Assistant 🇮🇳. I provide real-time air quality insights, health recommendations, and environmental predictions using ISRO satellite data and advanced AI. How can I help you breathe better today?',
@@ -64,7 +71,7 @@ export const AIAssistant = () => {
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       type: 'user',
       content: inputValue,
       timestamp: new Date().toLocaleTimeString()
@@ -96,7 +103,7 @@ export const AIAssistant = () => {
         response += '\n\n🌳 Bangalore-specific: Garden City benefits from green cover. Tech corridors have moderate pollution levels.';
       }
 
-      const aiMessage = {
+      const aiMessage: Message = {
         type: 'ai',
         content: response,
         timestamp: new Date().toLocaleTimeString(),
