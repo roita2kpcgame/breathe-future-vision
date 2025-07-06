@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CitySelector } from './CitySelector';
 import { Badge } from '@/components/ui/badge';
-import { IndiaMap } from './IndiaMap';
-import { Satellite, MapPin, Wind, Eye, TrendingUp, RefreshCw } from 'lucide-react';
+import { EnhancedIndiaMap } from './EnhancedIndiaMap';
+import { Satellite, MapPin, Wind, Eye, TrendingUp, RefreshCw, Activity } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePollutionData } from '@/hooks/usePollutionData';
 
@@ -19,21 +18,21 @@ export const PollutionMap = () => {
   return (
     <section id="pollution-map" className="py-12 sm:py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-8 sm:mb-12 animate-fade-in">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#263238] mb-4 flex items-center justify-center space-x-2 sm:space-x-3 flex-wrap">
-            <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-[#00C853]" />
+            <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-[#00C853] animate-pulse" />
             <span className="text-center">{t('livePollutionMapping')}</span>
-            <Satellite className="w-8 h-8 sm:w-10 sm:h-10 text-[#FF6F00]" />
+            <Satellite className="w-8 h-8 sm:w-10 sm:h-10 text-[#FF6F00] animate-bounce" />
           </h2>
           <p className="text-lg sm:text-xl text-[#263238]/70 max-w-3xl mx-auto px-4">
-            {t('pollutionDescription')} - Now covering 51 major Indian cities with real-time WAQI data
+            {t('pollutionDescription')} - Enhanced real-time monitoring across {cities.length} major Indian cities
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Enhanced Interactive Map */}
           <div className="lg:col-span-2">
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 to-green-50/90 backdrop-blur-sm border-[#00C853]/20 shadow-xl">
+            <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 to-green-50/90 backdrop-blur-sm border-[#00C853]/20 shadow-xl animate-scale-in">
               <div className="mb-4 flex items-center justify-between">
                 <CitySelector 
                   selectedCity={selectedCity}
@@ -42,14 +41,15 @@ export const PollutionMap = () => {
                 />
                 <div className="flex items-center space-x-2">
                   {loading && <RefreshCw className="w-4 h-4 animate-spin text-[#00C853]" />}
-                  <Badge className="bg-[#00C853] text-white">
+                  <Badge className="bg-[#00C853] text-white animate-pulse">
+                    <Activity className="w-3 h-3 mr-1" />
                     {cities.length} Cities
                   </Badge>
                 </div>
               </div>
               
-              {/* Real India Map */}
-              <IndiaMap 
+              {/* Enhanced India Map */}
+              <EnhancedIndiaMap 
                 cities={cities}
                 selectedCity={selectedCity}
                 onCitySelect={setSelectedCity}
@@ -62,39 +62,47 @@ export const PollutionMap = () => {
             </Card>
           </div>
 
-          {/* Enhanced City Details */}
+          {/* Enhanced city details section */}
           <div className="space-y-4 sm:space-y-6">
             {currentCity && (
-              <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/95 to-blue-50/95 backdrop-blur-sm border-[#00C853]/20 shadow-xl">
+              <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/95 to-blue-50/95 backdrop-blur-sm border-[#00C853]/20 shadow-xl animate-fade-in">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl sm:text-2xl font-bold text-[#263238] flex items-center space-x-2">
-                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-[#00C853]" />
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-[#00C853] animate-pulse" />
                     <span className="truncate">{currentCity.name}</span>
                   </h3>
-                  <Badge className="text-sm" style={{ backgroundColor: currentCity.color, color: 'white' }}>
+                  <Badge className="text-sm animate-bounce" style={{ backgroundColor: currentCity.color, color: 'white' }}>
                     {currentCity.aqi}
                   </Badge>
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg transform hover:scale-105 transition-all duration-300">
                     <span className="text-[#263238]/70 font-medium">PM2.5</span>
                     <span className="font-bold text-lg" style={{ color: currentCity.color }}>
                       {currentCity.pm25} μg/m³
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg transform hover:scale-105 transition-all duration-300">
                     <span className="text-[#263238]/70 font-medium">PM10</span>
                     <span className="font-bold text-lg" style={{ color: currentCity.color }}>
                       {currentCity.pm10} μg/m³
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg transform hover:scale-105 transition-all duration-300">
                     <span className="text-[#263238]/70 font-medium">State</span>
                     <span className="font-medium text-[#263238] truncate">
                       {currentCity.state}
                     </span>
                   </div>
+                  {currentCity.actualAqi && (
+                    <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#00C853]/10 to-[#00C853]/5 rounded-lg">
+                      <span className="text-[#263238]/70 font-medium">Real AQI</span>
+                      <span className="font-bold text-lg text-[#00C853]">
+                        {currentCity.actualAqi}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 p-3 bg-gradient-to-r from-[#00C853]/10 to-[#FF6F00]/10 rounded-lg">
@@ -114,6 +122,7 @@ export const PollutionMap = () => {
               </Card>
             )}
 
+            {/* tabs and data refresh section */}
             <Tabs defaultValue="satellite" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-white/80">
                 <TabsTrigger value="satellite" className="data-[state=active]:bg-[#00C853] data-[state=active]:text-white text-sm">
@@ -166,7 +175,7 @@ export const PollutionMap = () => {
                   size="sm" 
                   onClick={refreshData}
                   disabled={loading}
-                  className="bg-[#00C853] hover:bg-[#00A844]"
+                  className="bg-[#00C853] hover:bg-[#00A844] transform hover:scale-105 transition-all duration-300"
                 >
                   {loading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />

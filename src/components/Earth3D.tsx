@@ -3,28 +3,28 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Satellite, Globe, Zap, MapPin, Wind, RefreshCw, Thermometer, Droplets, Gauge } from 'lucide-react';
 import { CitySelector } from './CitySelector';
-import { IndiaMap } from './IndiaMap';
+import { EnhancedIndiaMap } from './EnhancedIndiaMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePollutionData } from '@/hooks/usePollutionData';
 
 export const Earth3D = () => {
   const { t } = useLanguage();
   const [selectedCity, setSelectedCity] = useState('Delhi');
-  const { cities, loading, lastUpdated, error, refreshData } = usePollutionData();
+  const { cities, loading, lastUpdated, error, refreshData, retryCount } = usePollutionData();
 
   const currentCity = cities.find(city => city.name === selectedCity);
 
   return (
-    <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50/95 via-indigo-50/95 to-purple-50/95 border-2 border-[#00C853]/20 shadow-2xl">
+    <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50/95 via-indigo-50/95 to-purple-50/95 border-2 border-[#00C853]/20 shadow-2xl backdrop-blur-sm">
       <div className="text-center mb-4">
         <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#263238] mb-2 flex items-center justify-center space-x-2 flex-wrap">
-          <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-[#00C853]" />
+          <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-[#00C853] animate-spin" />
           <span className="text-center">{t('liveSatelliteMapping')}</span>
-          <Satellite className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6F00]" />
+          <Satellite className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6F00] animate-bounce" />
         </h3>
         <p className="text-sm text-[#263238]/70 flex items-center justify-center space-x-2 flex-wrap">
           <span className="text-center">{t('satelliteDescription')}</span>
-          <Wind className="w-4 h-4 text-blue-500" />
+          <Wind className="w-4 h-4 text-blue-500 animate-pulse" />
         </p>
       </div>
 
@@ -36,10 +36,10 @@ export const Earth3D = () => {
         />
       </div>
 
-      {/* Real India Map */}
+      {/* Enhanced India Map */}
       <div className="flex justify-center mb-4 sm:mb-6">
-        <div className="relative w-full max-w-2xl">
-          <IndiaMap 
+        <div className="relative w-full max-w-3xl">
+          <EnhancedIndiaMap 
             cities={cities}
             selectedCity={selectedCity}
             onCitySelect={setSelectedCity}
@@ -48,18 +48,18 @@ export const Earth3D = () => {
       </div>
 
       {currentCity && (
-        <div className="mb-4 p-4 bg-gradient-to-r from-white/70 to-blue-50/70 rounded-xl border border-white/50">
+        <div className="mb-4 p-4 bg-gradient-to-r from-white/70 to-blue-50/70 rounded-xl border border-white/50 backdrop-blur-sm animate-fade-in">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-bold text-[#263238] flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-[#00C853]" />
+              <MapPin className="w-4 h-4 text-[#00C853] animate-pulse" />
               <span className="truncate">{currentCity.name}, {currentCity.state}</span>
             </h4>
             <div className="flex items-center space-x-2">
-              <Badge style={{ backgroundColor: currentCity.color, color: 'white' }}>
+              <Badge style={{ backgroundColor: currentCity.color, color: 'white' }} className="animate-pulse">
                 PM2.5: {currentCity.pm25}
               </Badge>
               {currentCity.actualAqi && (
-                <Badge className="bg-[#00C853] text-white">
+                <Badge className="bg-[#00C853] text-white animate-bounce">
                   AQI: {currentCity.actualAqi}
                 </Badge>
               )}
@@ -177,22 +177,23 @@ export const Earth3D = () => {
         </div>
       )}
 
+      {/* Legend */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center mb-4">
-        <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm">
+        <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium">Good</span>
           </div>
           <p className="text-xs text-gray-600">0-12 PM2.5</p>
         </div>
-        <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm">
+        <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium">Moderate</span>
           </div>
           <p className="text-xs text-gray-600">35-55 PM2.5</p>
         </div>
-        <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm">
+        <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium">Severe</span>
@@ -202,7 +203,7 @@ export const Earth3D = () => {
       </div>
 
       <div className="flex justify-center space-x-2 sm:space-x-4 flex-wrap gap-2 mb-4">
-        <Badge className="bg-[#00C853] text-white flex items-center space-x-1">
+        <Badge className="bg-[#00C853] text-white flex items-center space-x-1 animate-pulse">
           <Zap className="w-3 h-3" />
           <span>Live Data</span>
         </Badge>
@@ -212,24 +213,24 @@ export const Earth3D = () => {
         </Badge>
         <Badge className="bg-blue-600 text-white flex items-center space-x-1">
           <Globe className="w-3 h-3" />
-          <span>51 Cities</span>
+          <span>{cities.length} Cities</span>
         </Badge>
       </div>
 
-      {/* Data refresh controls with error display */}
+      {/* Enhanced data refresh controls */}
       <div className="flex items-center justify-between text-xs text-[#263238]/60">
         <div className="flex items-center space-x-1">
           {loading && <RefreshCw className="w-3 h-3 animate-spin" />}
           <span>
             {loading ? 'Updating...' : 
-             error ? `${error}` :
+             error ? `${error} ${retryCount > 0 ? `(Retry ${retryCount}/3)` : ''}` :
              lastUpdated ? `Updated: ${lastUpdated.toLocaleTimeString()}` : 'Ready'}
           </span>
         </div>
         <button 
           onClick={refreshData}
           disabled={loading}
-          className="flex items-center space-x-1 px-2 py-1 bg-[#00C853]/10 rounded hover:bg-[#00C853]/20 transition-colors"
+          className="flex items-center space-x-1 px-3 py-1 bg-[#00C853]/10 rounded-full hover:bg-[#00C853]/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
