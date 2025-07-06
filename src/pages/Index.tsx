@@ -9,6 +9,8 @@ import { ParticleBackground } from '@/components/ParticleBackground';
 import { AIAssistant } from '@/components/AIAssistant';
 import { Earth3D } from '@/components/Earth3D';
 import { UniqueTools } from '@/components/UniqueTools';
+import { VayuRakshak2030 } from '@/components/VayuRakshak2030';
+import { TechArchitecture } from '@/components/TechArchitecture';
 
 const Index = () => {
   return (
@@ -26,7 +28,15 @@ const Index = () => {
         </section>
         
         <PollutionMap />
+        
+        {/* VayuRakshak 2030 Vision Section */}
+        <VayuRakshak2030 />
+        
         <EnhancedDataDashboard />
+        
+        {/* Technical Architecture */}
+        <TechArchitecture />
+        
         <AIForecasting />
         <UniqueTools />
         <FeatureGrid />
