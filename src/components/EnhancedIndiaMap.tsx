@@ -276,8 +276,28 @@ export const EnhancedIndiaMap = ({ cities, selectedCity, onCitySelect }: Enhance
     setHoveredCity(foundCity);
   };
 
+  // CSS styles as a string for the scrollbar
+  const scrollbarStyles = `
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #00C853 transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #00C853;
+      border-radius: 2px;
+    }
+  `;
+
   return (
     <div className="relative w-full">
+      <style dangerouslySetInnerHTML={{ __html: scrollbarStyles }} />
+      
       <div className="flex justify-center mb-4">
         <canvas
           ref={canvasRef}
@@ -340,23 +360,6 @@ export const EnhancedIndiaMap = ({ cities, selectedCity, onCitySelect }: Enhance
           </span>
         </div>
       )}
-
-      <style jsx>{`
-        .custom-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: #00C853 transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #00C853;
-          border-radius: 2px;
-        }
-      `}</style>
     </div>
   );
 };
