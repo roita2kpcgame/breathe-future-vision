@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Zap } from 'lucide-react';
+import { cityPositions } from '@/data/cities';
 
 interface City {
   name: string;
@@ -23,18 +24,6 @@ interface IndiaMapProps {
 export const IndiaMap = ({ cities, selectedCity, onCitySelect }: IndiaMapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mapDimensions, setMapDimensions] = useState({ width: 500, height: 400 });
-
-  // Enhanced city positions based on actual geography
-  const cityPositions = {
-    'Delhi': { x: 0.45, y: 0.25 },
-    'Mumbai': { x: 0.35, y: 0.55 },
-    'Bangalore': { x: 0.48, y: 0.75 },
-    'Chennai': { x: 0.55, y: 0.78 },
-    'Kolkata': { x: 0.68, y: 0.45 },
-    'Hyderabad': { x: 0.50, y: 0.65 },
-    'Pune': { x: 0.40, y: 0.58 },
-    'Ahmedabad': { x: 0.30, y: 0.40 }
-  };
 
   const citiesWithPositions = cities.map(city => ({
     ...city,
@@ -148,32 +137,32 @@ export const IndiaMap = ({ cities, selectedCity, onCitySelect }: IndiaMapProps) 
 
     drawIndiaMap();
 
-    // Draw cities
+    // Draw cities with enhanced visualization for 51 cities
     citiesWithPositions.forEach((city) => {
       const x = city.position.x * mapDimensions.width;
       const y = city.position.y * mapDimensions.height;
       const isSelected = city.name === selectedCity;
-      const baseSize = 8;
+      const baseSize = 6;
       const intensity = city.pm25 / 200;
-      const size = baseSize + intensity * 12;
+      const size = baseSize + intensity * 8;
 
-      // City glow effect
+      // City glow effect for selected city
       if (isSelected) {
-        const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, size + 15);
-        glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+        const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, size + 12);
+        glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
         glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
         
         ctx.beginPath();
-        ctx.arc(x, y, size + 15, 0, Math.PI * 2);
+        ctx.arc(x, y, size + 12, 0, Math.PI * 2);
         ctx.fillStyle = glowGradient;
         ctx.fill();
       }
 
-      // Pollution visualization
+      // Pollution visualization with gradient
       const pollutionGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
       pollutionGradient.addColorStop(0, city.color + 'FF');
-      pollutionGradient.addColorStop(0.6, city.color + 'AA');
-      pollutionGradient.addColorStop(1, city.color + '33');
+      pollutionGradient.addColorStop(0.6, city.color + 'BB');
+      pollutionGradient.addColorStop(1, city.color + '44');
       
       ctx.beginPath();
       ctx.arc(x, y, size, 0, Math.PI * 2);
@@ -184,17 +173,25 @@ export const IndiaMap = ({ cities, selectedCity, onCitySelect }: IndiaMapProps) 
       ctx.beginPath();
       ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.strokeStyle = isSelected ? '#FFFFFF' : city.color;
-      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.lineWidth = isSelected ? 2.5 : 1.5;
       ctx.stroke();
 
-      // Pulse animation for high pollution
-      if (city.pm25 > 100) {
-        const pulseSize = size + Math.sin(Date.now() * 0.005) * 4;
+      // Pulse animation for severe pollution
+      if (city.pm25 > 150) {
+        const pulseSize = size + Math.sin(Date.now() * 0.008) * 3;
         ctx.beginPath();
         ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
-        ctx.strokeStyle = city.color + '80';
+        ctx.strokeStyle = city.color + '60';
         ctx.lineWidth = 1;
         ctx.stroke();
+      }
+
+      // City name for selected city
+      if (isSelected) {
+        ctx.fillStyle = '#263238';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(city.name, x, y - size - 8);
       }
     });
 
@@ -214,7 +211,7 @@ export const IndiaMap = ({ cities, selectedCity, onCitySelect }: IndiaMapProps) 
       const cityY = city.position.y * mapDimensions.height;
       const distance = Math.sqrt((clickX - cityX) ** 2 + (clickY - cityY) ** 2);
       
-      if (distance < 25) { // Click tolerance
+      if (distance < 20) { // Click tolerance
         onCitySelect(city.name);
       }
     });
@@ -235,13 +232,13 @@ export const IndiaMap = ({ cities, selectedCity, onCitySelect }: IndiaMapProps) 
       <div className="absolute top-2 right-2 md:top-4 md:right-4">
         <Badge className="bg-[#00C853] text-white">
           <Zap className="w-3 h-3 mr-1" />
-          Live
+          Live WAQI
         </Badge>
       </div>
 
-      {/* City labels for mobile */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 text-xs">
-        {citiesWithPositions.slice(0, 8).map((city) => (
+      {/* Enhanced city labels grid for mobile - showing more cities */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-4 text-xs max-h-48 overflow-y-auto">
+        {citiesWithPositions.slice(0, 20).map((city) => (
           <button
             key={city.name}
             onClick={() => onCitySelect(city.name)}
@@ -253,17 +250,25 @@ export const IndiaMap = ({ cities, selectedCity, onCitySelect }: IndiaMapProps) 
           >
             <div className="flex items-center space-x-2">
               <div 
-                className="w-3 h-3 rounded-full"
+                className="w-3 h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: city.color }}
               />
-              <div>
-                <div className="font-medium text-[#263238]">{city.name}</div>
-                <div className="text-[#263238]/60">{city.aqi}</div>
+              <div className="min-w-0 flex-1">
+                <div className="font-medium text-[#263238] truncate">{city.name}</div>
+                <div className="text-[#263238]/60 truncate">{city.aqi}</div>
               </div>
             </div>
           </button>
         ))}
       </div>
+      
+      {citiesWithPositions.length > 20 && (
+        <div className="text-center mt-2">
+          <span className="text-xs text-[#263238]/60">
+            Showing 20 of {citiesWithPositions.length} cities. Click on map for more.
+          </span>
+        </div>
+      )}
     </div>
   );
 };

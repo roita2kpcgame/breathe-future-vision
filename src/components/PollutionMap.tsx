@@ -6,22 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CitySelector } from './CitySelector';
 import { Badge } from '@/components/ui/badge';
 import { IndiaMap } from './IndiaMap';
-import { Satellite, MapPin, Wind, Eye, TrendingUp } from 'lucide-react';
+import { Satellite, MapPin, Wind, Eye, TrendingUp, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePollutionData } from '@/hooks/usePollutionData';
 
 export const PollutionMap = () => {
   const { t } = useLanguage();
-  const cities = [
-    { name: 'Delhi', pm25: 156, pm10: 234, aqi: 'Severe', color: '#FF5722', state: 'Delhi', coordinates: [77.2090, 28.6139] as [number, number] },
-    { name: 'Mumbai', pm25: 89, pm10: 145, aqi: 'Moderate', color: '#FFA726', state: 'Maharashtra', coordinates: [72.8777, 19.0760] as [number, number] },
-    { name: 'Bangalore', pm25: 67, pm10: 98, aqi: 'Satisfactory', color: '#4CAF50', state: 'Karnataka', coordinates: [77.5946, 12.9716] as [number, number] },
-    { name: 'Chennai', pm25: 78, pm10: 112, aqi: 'Moderate', color: '#FFA726', state: 'Tamil Nadu', coordinates: [80.2707, 13.0827] as [number, number] },
-    { name: 'Kolkata', pm25: 134, pm10: 189, aqi: 'Very Poor', color: '#FF6F00', state: 'West Bengal', coordinates: [88.3639, 22.5726] as [number, number] },
-    { name: 'Hyderabad', pm25: 92, pm10: 156, aqi: 'Moderate', color: '#FFA726', state: 'Telangana', coordinates: [78.4867, 17.3850] as [number, number] },
-    { name: 'Pune', pm25: 74, pm10: 119, aqi: 'Moderate', color: '#FFA726', state: 'Maharashtra', coordinates: [73.8567, 18.5204] as [number, number] },
-    { name: 'Ahmedabad', pm25: 98, pm10: 167, aqi: 'Poor', color: '#FF8F00', state: 'Gujarat', coordinates: [72.5714, 23.0225] as [number, number] },
-  ];
-
+  const { cities, loading, lastUpdated, refreshData } = usePollutionData();
   const [selectedCity, setSelectedCity] = useState('Delhi');
   const currentCity = cities.find(city => city.name === selectedCity);
 
@@ -35,7 +26,7 @@ export const PollutionMap = () => {
             <Satellite className="w-8 h-8 sm:w-10 sm:h-10 text-[#FF6F00]" />
           </h2>
           <p className="text-lg sm:text-xl text-[#263238]/70 max-w-3xl mx-auto px-4">
-            {t('pollutionDescription')}
+            {t('pollutionDescription')} - Now covering 51 major Indian cities with real-time WAQI data
           </p>
         </div>
 
@@ -43,12 +34,18 @@ export const PollutionMap = () => {
           {/* Enhanced Interactive Map */}
           <div className="lg:col-span-2">
             <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 to-green-50/90 backdrop-blur-sm border-[#00C853]/20 shadow-xl">
-              <div className="mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <CitySelector 
                   selectedCity={selectedCity}
                   onCityChange={setSelectedCity}
                   cities={cities}
                 />
+                <div className="flex items-center space-x-2">
+                  {loading && <RefreshCw className="w-4 h-4 animate-spin text-[#00C853]" />}
+                  <Badge className="bg-[#00C853] text-white">
+                    {cities.length} Cities
+                  </Badge>
+                </div>
               </div>
               
               {/* Real India Map */}
@@ -57,6 +54,11 @@ export const PollutionMap = () => {
                 selectedCity={selectedCity}
                 onCitySelect={setSelectedCity}
               />
+              
+              <div className="mt-4 text-xs text-center text-[#263238]/60">
+                Data source: World Air Quality Index (WAQI) | 
+                {lastUpdated && ` Last updated: ${lastUpdated.toLocaleTimeString()}`}
+              </div>
             </Card>
           </div>
 
@@ -101,9 +103,12 @@ export const PollutionMap = () => {
                     <span className="text-sm font-semibold text-[#263238]">Health Advisory</span>
                   </div>
                   <p className="text-xs text-[#263238]/70">
-                    {currentCity.aqi === 'Good' || currentCity.aqi === 'Satisfactory' ? 'Air quality is satisfactory for outdoor activities.' :
-                     currentCity.aqi === 'Moderate' ? 'Sensitive individuals should limit outdoor activities.' :
-                     'Consider wearing masks and limiting outdoor exposure.'}
+                    {currentCity.aqi === 'Good' ? 'Air quality is good for outdoor activities.' :
+                     currentCity.aqi === 'Satisfactory' ? 'Air quality is acceptable for most people.' :
+                     currentCity.aqi === 'Moderate' ? 'Sensitive individuals should consider limiting outdoor activities.' :
+                     currentCity.aqi === 'Poor' ? 'Everyone should reduce outdoor activities and wear masks.' :
+                     currentCity.aqi === 'Very Poor' ? 'Avoid outdoor activities. Health warnings for everyone.' :
+                     'Emergency conditions. Avoid all outdoor activities.'}
                   </p>
                 </div>
               </Card>
@@ -112,24 +117,26 @@ export const PollutionMap = () => {
             <Tabs defaultValue="satellite" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-white/80">
                 <TabsTrigger value="satellite" className="data-[state=active]:bg-[#00C853] data-[state=active]:text-white text-sm">
-                  Satellite
+                  WAQI Data
                 </TabsTrigger>
                 <TabsTrigger value="ground" className="data-[state=active]:bg-[#FF6F00] data-[state=active]:text-white text-sm">
-                  Ground Stations
+                  Coverage
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="satellite">
                 <Card className="p-4 bg-gradient-to-br from-blue-50/90 to-white/90 backdrop-blur-sm border-[#00C853]/20">
                   <h4 className="font-semibold text-[#263238] mb-2 flex items-center space-x-2">
                     <Satellite className="w-4 h-4 text-[#00C853]" />
-                    <span>ISRO Satellite Data</span>
+                    <span>World Air Quality Index</span>
                   </h4>
                   <p className="text-sm text-[#263238]/70 mb-3">
-                    AOD measurements from INSAT-3D/3DR satellites
+                    Real-time air quality data from global monitoring network
                   </p>
-                  <div className="text-2xl font-bold text-[#00C853] mb-2">0.78 AOD</div>
+                  <div className="text-2xl font-bold text-[#00C853] mb-2">
+                    {cities.filter(city => city.aqi !== 'Good').length} / {cities.length}
+                  </div>
                   <Badge className="bg-[#00C853]/10 text-[#00C853] border-[#00C853]/20">
-                    Updated 15 min ago
+                    Cities with Poor+ AQI
                   </Badge>
                 </Card>
               </TabsContent>
@@ -137,18 +144,44 @@ export const PollutionMap = () => {
                 <Card className="p-4 bg-gradient-to-br from-orange-50/90 to-white/90 backdrop-blur-sm border-[#FF6F00]/20">
                   <h4 className="font-semibold text-[#263238] mb-2 flex items-center space-x-2">
                     <MapPin className="w-4 h-4 text-[#FF6F00]" />
-                    <span>CPCB Ground Stations</span>
+                    <span>Geographic Coverage</span>
                   </h4>
                   <p className="text-sm text-[#263238]/70 mb-3">
-                    Real-time measurements from local monitors
+                    Monitoring stations across all major Indian states
                   </p>
-                  <div className="text-2xl font-bold text-[#FF6F00] mb-2">12 Stations</div>
+                  <div className="text-2xl font-bold text-[#FF6F00] mb-2">
+                    {new Set(cities.map(city => city.state)).size} States
+                  </div>
                   <Badge className="bg-[#FF6F00]/10 text-[#FF6F00] border-[#FF6F00]/20">
-                    All Active
+                    Complete Coverage
                   </Badge>
                 </Card>
               </TabsContent>
             </Tabs>
+
+            <Card className="p-4 bg-gradient-to-br from-green-50/90 to-white/90 backdrop-blur-sm border-[#00C853]/20">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-[#263238]">Data Refresh</h4>
+                <Button 
+                  size="sm" 
+                  onClick={refreshData}
+                  disabled={loading}
+                  className="bg-[#00C853] hover:bg-[#00A844]"
+                >
+                  {loading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Refresh
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-[#263238]/60">
+                {lastUpdated ? `Last updated: ${lastUpdated.toLocaleString()}` : 'Data loading...'}
+              </p>
+            </Card>
           </div>
         </div>
       </div>

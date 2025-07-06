@@ -1,26 +1,17 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Satellite, Globe, Zap, MapPin, Wind } from 'lucide-react';
+import { Satellite, Globe, Zap, MapPin, Wind, RefreshCw } from 'lucide-react';
 import { CitySelector } from './CitySelector';
 import { IndiaMap } from './IndiaMap';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePollutionData } from '@/hooks/usePollutionData';
 
 export const Earth3D = () => {
   const { t } = useLanguage();
   const [selectedCity, setSelectedCity] = useState('Delhi');
-
-  const cities = [
-    { name: 'Delhi', pm25: 156, pm10: 234, aqi: 'Severe', color: '#FF5722', state: 'Delhi', coordinates: [77.2090, 28.6139] as [number, number] },
-    { name: 'Mumbai', pm25: 89, pm10: 145, aqi: 'Moderate', color: '#FFA726', state: 'Maharashtra', coordinates: [72.8777, 19.0760] as [number, number] },
-    { name: 'Bangalore', pm25: 67, pm10: 98, aqi: 'Satisfactory', color: '#4CAF50', state: 'Karnataka', coordinates: [77.5946, 12.9716] as [number, number] },
-    { name: 'Chennai', pm25: 78, pm10: 112, aqi: 'Moderate', color: '#FFA726', state: 'Tamil Nadu', coordinates: [80.2707, 13.0827] as [number, number] },
-    { name: 'Kolkata', pm25: 134, pm10: 189, aqi: 'Very Poor', color: '#FF6F00', state: 'West Bengal', coordinates: [88.3639, 22.5726] as [number, number] },
-    { name: 'Hyderabad', pm25: 92, pm10: 156, aqi: 'Moderate', color: '#FFA726', state: 'Telangana', coordinates: [78.4867, 17.3850] as [number, number] },
-    { name: 'Pune', pm25: 74, pm10: 119, aqi: 'Moderate', color: '#FFA726', state: 'Maharashtra', coordinates: [73.8567, 18.5204] as [number, number] },
-    { name: 'Ahmedabad', pm25: 98, pm10: 167, aqi: 'Poor', color: '#FF8F00', state: 'Gujarat', coordinates: [72.5714, 23.0225] as [number, number] },
-  ];
+  const { cities, loading, lastUpdated, refreshData } = usePollutionData();
 
   const currentCity = cities.find(city => city.name === selectedCity);
 
@@ -91,37 +82,55 @@ export const Earth3D = () => {
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium">Good</span>
           </div>
-          <p className="text-xs text-gray-600">0-50 AQI</p>
+          <p className="text-xs text-gray-600">0-12 PM2.5</p>
         </div>
         <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium">Moderate</span>
           </div>
-          <p className="text-xs text-gray-600">51-100 AQI</p>
+          <p className="text-xs text-gray-600">35-55 PM2.5</p>
         </div>
         <div className="p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
             <span className="text-xs font-medium">Severe</span>
           </div>
-          <p className="text-xs text-gray-600">201+ AQI</p>
+          <p className="text-xs text-gray-600">250+ PM2.5</p>
         </div>
       </div>
 
-      <div className="flex justify-center space-x-2 sm:space-x-4 flex-wrap gap-2">
+      <div className="flex justify-center space-x-2 sm:space-x-4 flex-wrap gap-2 mb-4">
         <Badge className="bg-[#00C853] text-white flex items-center space-x-1">
           <Zap className="w-3 h-3" />
           <span>Live Data</span>
         </Badge>
         <Badge className="bg-[#FF6F00] text-white flex items-center space-x-1">
           <Satellite className="w-3 h-3" />
-          <span>4 ISRO Satellites</span>
+          <span>WAQI API</span>
         </Badge>
         <Badge className="bg-blue-600 text-white flex items-center space-x-1">
           <Globe className="w-3 h-3" />
-          <span>NavIC Enabled</span>
+          <span>51 Cities</span>
         </Badge>
+      </div>
+
+      {/* Data refresh controls */}
+      <div className="flex items-center justify-between text-xs text-[#263238]/60">
+        <div className="flex items-center space-x-1">
+          {loading && <RefreshCw className="w-3 h-3 animate-spin" />}
+          <span>
+            {loading ? 'Updating...' : lastUpdated ? `Updated: ${lastUpdated.toLocaleTimeString()}` : 'Ready'}
+          </span>
+        </div>
+        <button 
+          onClick={refreshData}
+          disabled={loading}
+          className="flex items-center space-x-1 px-2 py-1 bg-[#00C853]/10 rounded hover:bg-[#00C853]/20 transition-colors"
+        >
+          <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </button>
       </div>
     </Card>
   );
