@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,6 +11,8 @@ export const EnhancedDataDashboard = () => {
   const { cities, loading } = usePollutionData();
   const [activeTab, setActiveTab] = useState('overview');
   const [timeRange, setTimeRange] = useState('24h');
+  const [chartsVisible, setChartsVisible] = useState<Record<string, boolean>>({});
+  const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Enhanced data processing with memoization for better performance
   const dashboardData = useMemo(() => {
@@ -102,6 +104,33 @@ export const EnhancedDataDashboard = () => {
     };
   }, [cities]);
 
+  // Intersection Observer for chart animations
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    
+    Object.entries(chartRefs.current).forEach(([key, ref]) => {
+      if (ref) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                setChartsVisible((prev) => ({ ...prev, [key]: true }));
+              }
+            });
+          },
+          { threshold: 0.2 }
+        );
+        
+        observer.observe(ref);
+        observers.push(observer);
+      }
+    });
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [activeTab]);
+
   if (loading) {
     return (
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50/50 to-blue-50/50 backdrop-blur-sm">
@@ -175,16 +204,29 @@ export const EnhancedDataDashboard = () => {
           <TabsContent value="overview" className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Enhanced Top Polluted Cities */}
-              <Card className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-scale-in">
+              <Card 
+                ref={(el) => (chartRefs.current['topPolluted'] = el)}
+                className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-scale-in"
+              >
                 <h3 className="text-xl font-bold text-[#263238] mb-4 flex items-center space-x-2">
                   <TrendingUp className="w-5 h-5 text-[#FF6F00]" />
                   <span>Most Polluted Cities (PM2.5)</span>
                 </h3>
                 <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={dashboardData.topPollutedCities} layout="horizontal" margin={{ left: 80 }}>
+                  <BarChart 
+                    data={dashboardData.topPollutedCities} 
+                    layout="horizontal" 
+                    margin={{ left: 80 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#263238" opacity={0.1} />
                     <XAxis type="number" stroke="#263238" />
-                    <YAxis type="category" dataKey="city" stroke="#263238" width={75} />
+                    <YAxis 
+                      type="category" 
+                      dataKey="city" 
+                      stroke="#263238" 
+                      width={75}
+                      tick={{ fontSize: 12 }}
+                    />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.95)', 
@@ -194,17 +236,33 @@ export const EnhancedDataDashboard = () => {
                       }}
                       formatter={(value: any, name: any, props: any) => [
                         `${value} μg/m³`,
-                        'PM2.5',
-                        `Rank: #${props.payload.rank}`
+                        'PM2.5'
                       ]}
+                      labelFormatter={(label: any, payload: any) => {
+                        if (payload && payload[0]) {
+                          return `${payload[0].payload.city} (Rank: #${payload[0].payload.rank})`;
+                        }
+                        return label;
+                      }}
                     />
-                    <Bar dataKey="value" fill="#FF6F00" radius={[0, 6, 6, 0]} />
+                    <Bar 
+                      dataKey="value" 
+                      fill="#FF6F00" 
+                      radius={[0, 6, 6, 0]}
+                      isAnimationActive={chartsVisible['topPolluted'] ?? false}
+                      animationDuration={1500}
+                      animationBegin={0}
+                      animationEasing="ease-out"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
 
               {/* Enhanced AQI Distribution */}
-              <Card className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-scale-in">
+              <Card 
+                ref={(el) => (chartRefs.current['aqiPie'] = el)}
+                className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-scale-in"
+              >
                 <h3 className="text-xl font-bold text-[#263238] mb-4">AQI Category Distribution</h3>
                 <ResponsiveContainer width="100%" height={350}>
                   <PieChart>
@@ -217,9 +275,12 @@ export const EnhancedDataDashboard = () => {
                       outerRadius={100}
                       fill="#8884d8"
                       dataKey="value"
+                      isAnimationActive={chartsVisible['aqiPie'] ?? false}
+                      animationDuration={1200}
+                      animationBegin={0}
                     >
                       {dashboardData.aqiPieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell key={`cell-${entry.name}-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip 
@@ -238,7 +299,10 @@ export const EnhancedDataDashboard = () => {
           <TabsContent value="trends" className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Enhanced 24-Hour Trend */}
-              <Card className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-fade-in">
+              <Card 
+                ref={(el) => (chartRefs.current['hourlyTrend'] = el)}
+                className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-fade-in"
+              >
                 <h3 className="text-xl font-bold text-[#263238] mb-4">24-Hour Pollution Trend</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={dashboardData.hourlyTrend}>
@@ -259,6 +323,9 @@ export const EnhancedDataDashboard = () => {
                       fill="#FF6F00" 
                       fillOpacity={0.3}
                       strokeWidth={3}
+                      isAnimationActive={chartsVisible['hourlyTrend'] ?? false}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                     <Area 
                       type="monotone" 
@@ -267,13 +334,19 @@ export const EnhancedDataDashboard = () => {
                       fill="#00C853" 
                       fillOpacity={0.2}
                       strokeWidth={2}
+                      isAnimationActive={chartsVisible['hourlyTrend'] ?? false}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </Card>
 
               {/* State-wise Average */}
-              <Card className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-fade-in">
+              <Card 
+                ref={(el) => (chartRefs.current['stateAvg'] = el)}
+                className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-fade-in"
+              >
                 <h3 className="text-xl font-bold text-[#263238] mb-4">State-wise PM2.5 Average</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={dashboardData.stateAvgData}>
@@ -288,7 +361,15 @@ export const EnhancedDataDashboard = () => {
                       }}
                       formatter={(value: any) => [`${value} μg/m³`, 'Average PM2.5']}
                     />
-                    <Bar dataKey="avgPM25" fill="#00C853" radius={[6, 6, 0, 0]} />
+                    <Bar 
+                      dataKey="avgPM25" 
+                      fill="#00C853" 
+                      radius={[6, 6, 0, 0]}
+                      isAnimationActive={chartsVisible['stateAvg'] ?? false}
+                      animationDuration={1500}
+                      animationBegin={0}
+                      animationEasing="ease-out"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
@@ -296,7 +377,10 @@ export const EnhancedDataDashboard = () => {
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-8">
-            <Card className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-scale-in">
+            <Card 
+              ref={(el) => (chartRefs.current['radar'] = el)}
+              className="p-6 bg-white/90 backdrop-blur-sm border-white/50 shadow-xl animate-scale-in"
+            >
               <h3 className="text-xl font-bold text-[#263238] mb-4">Pollutant Analysis Radar</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={dashboardData.pollutionRadar}>
@@ -310,6 +394,8 @@ export const EnhancedDataDashboard = () => {
                     fill="#FF6F00"
                     fillOpacity={0.3}
                     strokeWidth={2}
+                    isAnimationActive={chartsVisible['radar'] ?? false}
+                    animationDuration={1200}
                   />
                   <Radar
                     name="Safe Limits"
@@ -318,6 +404,8 @@ export const EnhancedDataDashboard = () => {
                     fill="#00C853"
                     fillOpacity={0.1}
                     strokeWidth={2}
+                    isAnimationActive={chartsVisible['radar'] ?? false}
+                    animationDuration={1200}
                   />
                   <Tooltip />
                 </RadarChart>
